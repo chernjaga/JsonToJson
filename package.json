@@ -1,0 +1,26 @@
+{
+  "name": "json-to-json",
+  "version": "0.0.1",
+  "description": "transform json file following provided scheme",
+  "main": "app/index.js",
+  "scripts": {
+    "start": "node app/index",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chernjaga/JsonToJson.git"
+  },
+  "keywords": [
+    "json",
+    "scheme",
+    "converter",
+    "transformjson"
+  ],
+  "author": "chernjaga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chernjaga/JsonToJson/issues"
+  },
+  "homepage": "https://github.com/chernjaga/JsonToJson#readme"
+}

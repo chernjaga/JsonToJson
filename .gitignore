@@ -132,3 +132,4 @@ dist
 # ignore local JSON
 *.json
 *.JSON
+!package.json
