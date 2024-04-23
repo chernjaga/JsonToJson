@@ -17,7 +17,7 @@ function validator(sourceJson, scheme, strictByScheme) {
   if (scheme.required) {
     for (const requiredField of scheme.required) {
       if (!sourceJson[requiredField]) {
-        outputObject[requiredField] = setDefaultValueByType(scheme.properties[requiredField].type);
+        outputObject[requiredField] = setDefaultValueByType(scheme.properties[requiredField].type, scheme.properties[requiredField].required, scheme.properties[requiredField]);
       }
     }
   }
@@ -34,21 +34,47 @@ function assignSpecificObject (src, scheme, strictByScheme) {
     }
   }
   if (scheme.type === 'array' && !Array.isArray(src)) {
-    console.log('first')
-    return Object.keys(src).map(item => validator(item, scheme.items[0], strictByScheme)) || setDefaultValueByType('array');
+  
+    return Object.keys(src).map(item => validator(item, scheme.items[0], strictByScheme));
   }
-  if (scheme.type === 'array' && Array.isArray(src)) return src.map(item => validator(item, scheme.items[0], strictByScheme)) || setDefaultValueByType('array');
+  if (scheme.type === 'array' && Array.isArray(src)) {
+
+    return src.map(item => validator(item, scheme.items[0], strictByScheme));
+  }
   return validator(src, scheme, strictByScheme);
 }
 
-function setDefaultValueByType(type, requiredField) {
-  switch (type) {
-    case 'string': return '';
-    case 'number': return 0;
-    case 'array': return [];
-    case 'object': return {};
-    default: return null;
+function setDefaultValueByType(type, requiredField, schema) {
+  if (!requiredField || !schema || !schema.properties) {
+    switch (type) {
+      case 'object': return {};
+      case 'array': return [];
+      default: return null;
+    }
   }
+  if (type === 'object') {
+    const output = {};
+    for (const field of requiredField) {
+      if (schema.properties && schema.properties[field].required) {
+        output[field] = setDefaultValueByType(schema.properties[field].type, schema.properties[field].required, schema.properties[field]);
+      } else {
+        output[field] = setDefaultValueByType(schema.properties[field].type);
+      }
+    }
+    return output;
+  }
+  if (type === 'array') {
+    const output = [];
+    for (const field of requiredField) {
+      if (schema.items && schema.items[0].required) {
+        output.push(setDefaultValueByType(schema.items[0].type, schema.items[0].required, schema.items[field]));
+      } else {
+        output[field] = setDefaultValueByType(schema.properties[field].type);
+      }
+    }
+    return output;
+  }
+  return null;
 }
 module.exports = {
   validator
