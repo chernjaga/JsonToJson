@@ -1,22 +1,31 @@
+const renameMap = require('./renameMap.json');
+
+const getOldKeyValue = (mapObject, value) => {
+  return Object.keys(mapObject).find(key => mapObject[key] === value);
+}
+
 function validator(sourceJson, scheme, strictByScheme) {
   const outputObject = {};
   if (!scheme) {
     return sourceJson || null;
   };
   for (const property in sourceJson) {
-    if (scheme.required && scheme.required.includes(property)) {
-        if (scheme.properties[property].type === 'string') {
-          outputObject[property] = sourceJson[property] || setDefaultValueByType('string');
+    const renamedKey = renameMap[property];
+    if (scheme.required && scheme.required.includes(renamedKey || property)) {
+        if (scheme.properties[renamedKey || property].type === 'string') {
+          outputObject[renamedKey || property] = sourceJson[property] || setDefaultValueByType('string');
         } else {
-          outputObject[property] = assignSpecificObject(sourceJson[property], scheme.properties[property], strictByScheme);
+          outputObject[renamedKey || property] = assignSpecificObject(sourceJson[property], scheme.properties[renamedKey || property], strictByScheme);
         }
     } else if (!strictByScheme) {
-      outputObject[property] = sourceJson[property];
+      outputObject[renamedKey || property] = sourceJson[property];
     }
   }
   if (scheme.required) {
     for (const requiredField of scheme.required) {
-      if (!sourceJson[requiredField]) {
+      const renamedRequiredKey = getOldKeyValue(renameMap, requiredField);
+      
+      if (!sourceJson[renamedRequiredKey]) {
         outputObject[requiredField] = setDefaultValueByType(scheme.properties[requiredField].type, scheme.properties[requiredField].required, scheme.properties[requiredField]);
       }
     }
@@ -42,7 +51,7 @@ function assignSpecificObject (src, scheme, strictByScheme) {
     return src.map(item => validator(item, scheme.items[0], strictByScheme));
   }
   return validator(src, scheme, strictByScheme);
-}
+};
 
 function setDefaultValueByType(type, requiredField, schema) {
   if (!requiredField || !schema || !schema.properties) {
@@ -75,7 +84,8 @@ function setDefaultValueByType(type, requiredField, schema) {
     return output;
   }
   return null;
-}
+};
+
 module.exports = {
   validator
 };

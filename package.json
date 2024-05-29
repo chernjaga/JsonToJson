@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/chernjaga/JsonToJson/issues"
   },
-  "homepage": "https://github.com/chernjaga/JsonToJson#readme"
+  "homepage": "https://github.com/chernjaga/JsonToJson#readme",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }
